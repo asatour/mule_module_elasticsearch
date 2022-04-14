@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:asana="http://www.mulesoft.org/schema/mule/asana"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/asana http://www.mulesoft.org/schema/mule/asana/current/mule-asana.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="8fa0d6e2-04f7-4ae3-a16f-f0b30d419172">
+		<http:request-connection port="443"/>
+	</http:request-config>
+	<flow name="elasticmuleFlow" doc:id="d58ed384-d149-40e3-a67f-5eb4452c69cb" >
+		<http:listener doc:name="Listener" doc:id="a5275e63-7d5f-4344-8302-1a0d6c1f05d1" config-ref="HTTP_Listener_config" path="/*">
+			<http:error-response statusCode="#[payload.error.typedAttributes.statusCode]">
+				<http:body ><![CDATA[#[payload.error.muleMessage.typedValue]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<logger level="INFO" doc:name="Listener Logger" doc:id="5ba06c8f-fe96-47d2-8ec6-0c759cf474bb" message="#[attributes.requestUri]"/>
+		<http:request method="POST" doc:name="Request" doc:id="cde62c35-d3e0-4c97-b40c-c825b5d36dac" config-ref="HTTP_Request_configuration" followRedirects="true" outputMimeType="application/json" url="https://my-deployment-b8bd5d.ent.francecentral.azure.elastic-cloud.com{path}">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"authorization" : attributes.headers.authorization,
+	"authority" : attributes.headers.authority,
+	"content-type" : "application/json",
+	"accept" : attributes.headers.accept
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"path" : attributes.requestUri
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Elasticsearch Request Logger" doc:id="691fd402-1e5e-4592-b054-071a1b03d95a" message="#[attributes]"/>
+		<error-handler ref="errorHandlerAdviser" />
+	</flow>
+	<error-handler name="errorHandlerAdviser" doc:id="05f7ff3b-aa67-43b3-bb84-2d0b04ed482c">
+	  <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" >
+			<ee:transform doc:name="Transform Message" doc:id="15f7c74b-1445-4864-9f3e-f93fb29a857f" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error" : {
+		"status": error.errorMessage.attributes.statusCode,
+		"reason": error.errorMessage.attributes.reasonPhrase,
+		"description": error.description,
+		"details": error.detailedDescription,
+		"type": error.errorType
+	}
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+	  </on-error-continue>
+	</error-handler>
+	
+</mule>
