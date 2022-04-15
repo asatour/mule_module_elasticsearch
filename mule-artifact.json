@@ -1,5 +1,6 @@
 {
   "minMuleVersion": "4.3.0",
+  "name": "elasticsearchmodule",
   "secureProperties": [
   	"secure.key",
   	"anypoint.platform.client_id",

@@ -16,7 +16,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<http:body ><![CDATA[#[payload.error.muleMessage.typedValue]]]></http:body>
 			</http:error-response>
 		</http:listener>
-		<logger level="INFO" doc:name="Listener Logger" doc:id="5ba06c8f-fe96-47d2-8ec6-0c759cf474bb" message="#[attributes.requestUri]"/>
+		<logger level="DEBUG" doc:name="Listener Logger" doc:id="5ba06c8f-fe96-47d2-8ec6-0c759cf474bb" message="#[attributes.requestUri]"/>
 		<http:request method="POST" doc:name="Request" doc:id="cde62c35-d3e0-4c97-b40c-c825b5d36dac" config-ref="HTTP_Request_configuration" followRedirects="true" outputMimeType="application/json" url="https://my-deployment-b8bd5d.ent.francecentral.azure.elastic-cloud.com{path}">
 			<http:headers ><![CDATA[#[output application/java
 ---
@@ -32,7 +32,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	"path" : attributes.requestUri
 }]]]></http:uri-params>
 		</http:request>
-		<logger level="INFO" doc:name="Elasticsearch Request Logger" doc:id="691fd402-1e5e-4592-b054-071a1b03d95a" message="#[attributes]"/>
+		<logger level="DEBUG" doc:name="Elasticsearch Request Logger" doc:id="691fd402-1e5e-4592-b054-071a1b03d95a" message="#[attributes]"/>
 		<error-handler ref="errorHandlerAdviser" />
 	</flow>
 	<error-handler name="errorHandlerAdviser" doc:id="05f7ff3b-aa67-43b3-bb84-2d0b04ed482c">
