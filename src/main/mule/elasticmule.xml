@@ -32,7 +32,29 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	"path" : attributes.requestUri
 }]]]></http:uri-params>
 		</http:request>
-		<logger level="DEBUG" doc:name="Elasticsearch Request Logger" doc:id="691fd402-1e5e-4592-b054-071a1b03d95a" message="#[attributes]"/>
+		<ee:transform doc:name="Transform Message" doc:id="8079bcb9-b10d-4f0d-b38b-d654494e877b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"meta": payload.meta,
+	"facets": payload.facets,
+	"results": payload.results map ((object, index) -> {
+		temp: object.temp,
+        pm2_5: object.pm2_5,
+        pm10: object.pm10,
+        humi: object.humi,
+        id: object.id,
+        date_heure: {
+        	snippet: object.date_heure.snippet as LocalDateTime {format: "yyyy-MM-dd'T'HH:mm:ss"} as String {format: "KK:mm:ss a, MMMM dd, uuuu"}
+        }
+	})
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="DEBUG" doc:name="Elasticsearch Request Logger" doc:id="691fd402-1e5e-4592-b054-071a1b03d95a" message="#[payload]"/>
 		<error-handler ref="errorHandlerAdviser" />
 	</flow>
 	<error-handler name="errorHandlerAdviser" doc:id="05f7ff3b-aa67-43b3-bb84-2d0b04ed482c">

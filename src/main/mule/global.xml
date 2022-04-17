@@ -9,7 +9,12 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
 http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP_Listener_config" doc:id="5c5b2b95-c706-46c8-bf3a-299439aea9c1" >
-		<http:listener-connection host="${http.listener.host}" port="${http.listener.port}"/>
+		<http:listener-connection host="${http.listener.host}" port="${http.listener.port}" protocol="HTTPS">
+			<tls:context >
+				<tls:key-store type="jks" path="keystore.jks" keyPassword="password" password="password" />
+			</tls:context>
+			
+		</http:listener-connection>
 		<http:listener-interceptors >
 			<http:cors-interceptor allowCredentials="true">
 				<http:origins >
